@@ -1,65 +1,57 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+// import styles from '../styles/Home.module.css'
+import { useRef, useEffect, useState } from 'react'
 
 export default function Home() {
+  const canvasRef = useRef(null)
+  const contextRef = useRef(null)
+  const [isDrawing, setIsDrawing] = useState(false)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    canvas.width = window.innerWidth * 2
+    canvas.height = window.innerHeight * 2
+    canvas.style.width = `${window.innerWidth}px`
+    canvas.style.height = `${window.innerHeight}px`
+
+    const context = canvas.getContext('2d')
+    context.scale(2, 2)
+    context.lineCap = 'round'
+    context.strokeStyle = 'black'
+    context.lineWidth = 5
+    contextRef.current = context
+  }, [])
+
+  const startDrawing = ({ nativeEvent }) => {
+    const { offsetX, offsetY } = nativeEvent
+    contextRef.current.beginPath()
+    contextRef.current.moveTo(offsetX, offsetY)
+    setIsDrawing(true)
+  }
+
+  const finishDrawing = () => {
+    contextRef.current.closePath()
+    setIsDrawing(false)
+  }
+  
+  const draw = ({ nativeEvent }) => {
+    if (!isDrawing) return
+
+    const { offsetX, offsetY } = nativeEvent
+    contextRef.current.lineTo(offsetX, offsetY)
+    contextRef.current.stroke()
+  }
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    <canvas
+      onMouseDown={startDrawing}
+      onMouseUp={finishDrawing}
+      onMouseMove={draw}
+      onTouchStart={startDrawing}
+      onTouchEnd={finishDrawing}
+      onTouchMove={draw}
+      ref={canvasRef}
+    >
+    </canvas>
   )
 }
