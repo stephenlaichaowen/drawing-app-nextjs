@@ -35,7 +35,7 @@ export default function Home() {
   }
   
   const draw = ({ nativeEvent }) => {
-    if (!isDrawing) return
+    if (!isDrawing) { return }
 
     const { offsetX, offsetY } = nativeEvent
     contextRef.current.lineTo(offsetX, offsetY)
